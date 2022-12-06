@@ -19,8 +19,7 @@ model Task {
   name      String
   notes     String
   place     String
-  startDate DateTime
-  endDate   DateTime
-  done      Boolean
+  date      DateTime
+  status    String
   createdAt DateTime @default(now())
 }

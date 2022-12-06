@@ -17,12 +17,9 @@ taskRoutes.post("/task", async (req, res) => {
     name: z.string(),
     notes: z.string(),
     place: z.string(),
-    startDate: z.dateIn(),
-    endDate: z.dateIn(),
+    date: z.dateIn(),
   });
-  const { name, notes, place, startDate, endDate } = createTaskBody.parse(
-    req.body
-  );
+  const { name, notes, place, date } = createTaskBody.parse(req.body);
 
   try {
     const postTasks = await prisma.task.create({
@@ -30,9 +27,8 @@ taskRoutes.post("/task", async (req, res) => {
         name,
         notes,
         place,
-        startDate,
-        endDate,
-        done: false,
+        date,
+        status: "to do",
       },
     });
     res.status(201).json({ postTasks, message: "Task created successfully" });
@@ -57,17 +53,25 @@ taskRoutes.get("/task/:id", async (req, res) => {
 
 taskRoutes.patch("/task/:id", async (req, res) => {
   const { id } = req.params;
-
+  const { status } = req.body;
+  if (status !== "doing" && status !== "to do" && status !== "done") {
+    return res.status(400).send({
+      message:
+        'Invalid parameters! Status must be equal to "to do", "doing" or "done"',
+    });
+  }
   try {
-    const setTaskDone = await prisma.task.update({
+    const setTaskStatus = await prisma.task.update({
       where: {
         id: id,
       },
       data: {
-        done: true,
+        status: status,
       },
     });
-    res.status(201).json({ setTaskDone, message: "Task updated successfully" });
+    res
+      .status(201)
+      .json({ setTaskStatus, message: "Task updated successfully" });
   } catch (error) {
     console.log(error);
   }
@@ -93,14 +97,19 @@ taskRoutes.put("/task/:id", async (req, res) => {
     notes: z.string(),
     place: z.string(),
     done: z.boolean(),
-    startDate: z.dateIn(),
-    endDate: z.dateIn(),
+    date: z.dateIn(),
   });
-  const { name, notes, place, startDate, endDate, done } = updateTaskBody.parse(
-    req.body
-  );
+
+  const { name, notes, place, date } = updateTaskBody.parse(req.body);
+  const { status } = req.body;
   const { id } = req.params;
 
+  if (status !== "doing" && status !== "to do" && status !== "done") {
+    return res.status(400).send({
+      message:
+        'Invalid parameters! Status must be equal to "to do", "doing" or "done"',
+    });
+  }
   try {
     const updateTask = await prisma.task.update({
       where: {
@@ -110,9 +119,8 @@ taskRoutes.put("/task/:id", async (req, res) => {
         name,
         notes,
         place,
-        startDate,
-        endDate,
-        done,
+        date,
+        status,
       },
     });
     res.status(200).json({ updateTask, message: "Task updated successfully" });
