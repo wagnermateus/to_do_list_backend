@@ -54,10 +54,9 @@ taskRoutes.get("/task/:id", async (req, res) => {
 taskRoutes.patch("/task/:id", async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  if (status !== "doing" && status !== "to do" && status !== "done") {
+  if (status !== "to do" && status !== "done") {
     return res.status(400).send({
-      message:
-        'Invalid parameters! Status must be equal to "to do", "doing" or "done"',
+      message: 'Invalid parameters! Status must be equal to "to do" or "done"',
     });
   }
   try {
@@ -104,10 +103,9 @@ taskRoutes.put("/task/:id", async (req, res) => {
   const { status } = req.body;
   const { id } = req.params;
 
-  if (status !== "doing" && status !== "to do" && status !== "done") {
+  if (status !== "to do" && status !== "done") {
     return res.status(400).send({
-      message:
-        'Invalid parameters! Status must be equal to "to do", "doing" or "done"',
+      message: 'Invalid parameters! Status must be equal to "to do" or "done"',
     });
   }
   try {
@@ -124,6 +122,22 @@ taskRoutes.put("/task/:id", async (req, res) => {
       },
     });
     res.status(200).json({ updateTask, message: "Task updated successfully" });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+taskRoutes.post("/searchtask", async (req, res) => {
+  const { name } = req.body;
+  try {
+    const findTaskByName = await prisma.task.findMany({
+      where: {
+        name: {
+          contains: name,
+        },
+      },
+    });
+    res.status(200).json(findTaskByName);
   } catch (error) {
     console.log(error);
   }
