@@ -142,4 +142,17 @@ taskRoutes.post("/searchtask", async (req, res) => {
     console.log(error);
   }
 });
+taskRoutes.post("/filtertasks", async (req, res) => {
+  const { status } = req.body;
+  try {
+    const filterTasks = await prisma.task.findMany({
+      where: {
+        status: status,
+      },
+    });
+    res.status(200).json(filterTasks);
+  } catch (err) {
+    console.log(err);
+  }
+});
 export { taskRoutes };
